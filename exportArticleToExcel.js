@@ -19,7 +19,7 @@ const Json2csvParser = require('json2csv').Parser
  */
 function toNeatJson(articles) {
     const neatArticles = _.map(articles, function(article) {
-        return _.pick(article, "title", "publish_date", "target_user", "int_page_from_session_read_user", "feed_share_from_session_user", "msgid")
+        return _.pick(article, "title", "publish_date", "target_user", "int_page_read_user", "int_page_from_session_read_user", "feed_share_from_session_user", "msgid")
     })
     return neatArticles
 }
@@ -37,9 +37,9 @@ function calcPercentage(articles) {
 
 function filterArticles(articles) {
     return _.filter(articles, function(article) {
-        return article.banner == 'Y' && article.int_page_from_session_read_user > 100*10000 || 
-            article.banner == 'N' && article.int_page_from_session_read_user > 40*10000;
-    })
+        return article.banner == 'Y' && article.int_page_read_user > 100*10000 || 
+            article.banner == 'N' && article.int_page_read_user > 40*10000;
+    });
 }
 function saveAsCsv(articles, path) {
     const fields = [{
@@ -54,6 +54,9 @@ function saveAsCsv(articles, path) {
     },{
         label: '总用户人数',
         value: 'target_user'
+    },{
+        label: '总阅读人数',
+        value: 'int_page_read_user'
     },{
         label: '一次打开人数',
         value: 'int_page_from_session_read_user'

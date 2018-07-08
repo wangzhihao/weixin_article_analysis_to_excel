@@ -1,2 +1,6 @@
 .DS_Store
+data*
+data.json
+*.csv
+*.xlsx
 node_modules/
