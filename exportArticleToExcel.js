@@ -34,6 +34,13 @@ function calcPercentage(articles) {
     })
     return articlesWithPercentage
 }
+
+function filterArticles(articles) {
+    return _.filter(articles, function(article) {
+        return article.banner == 'Y' && article.int_page_from_session_read_user > 100*10000 || 
+            article.banner == 'N' && article.int_page_from_session_read_user > 40*10000;
+    })
+}
 function saveAsCsv(articles, path) {
     const fields = [{
         label: '标题',
@@ -81,7 +88,7 @@ function main() {
         if (err) throw err // we'll not consider error handling for now
         const obj = jsonic(data)
         const articles = obj.total_article_data.list
-        saveAsCsv(calcPercentage(toNeatJson(articles)), destname)
+        saveAsCsv(filterArticles(calcPercentage(toNeatJson(articles))), destname)
     })
 }
 
