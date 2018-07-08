@@ -7,7 +7,7 @@
 
  *  Step 2: Install nodejs
  * 
- *  Step 3: Invoke this script via node ./exportArticleToExcel.js data.json
+ *  Step 3: Invoke this script via node ./exportArticleToExcel.js data.json final.csv
  */
 
 const fs = require('fs')
@@ -19,7 +19,7 @@ const Json2csvParser = require('json2csv').Parser
  */
 function toNeatJson(articles) {
     const neatArticles = _.map(articles, function(article) {
-        return _.pick(article, "title", "publish_date", "target_user", "int_page_read_user", "share_user")
+        return _.pick(article, "title", "publish_date", "target_user", "int_page_from_session_read_user", "feed_share_from_session_user", "msgid")
     })
     return neatArticles
 }
@@ -27,8 +27,9 @@ function toNeatJson(articles) {
 function calcPercentage(articles) {
     const articlesWithPercentage = _.map(articles, function(article) {
         return _.extend(article, {
-            "first_open_rate": (100.0 * article.int_page_read_user / article.target_user).toFixed(2),
-            "second_open_rate": (100.0 * article.share_user / article.int_page_read_user).toFixed(2)
+            "first_open_rate": (100.0 * article.int_page_from_session_read_user / article.target_user).toFixed(2),
+            "second_open_rate": (100.0 * article.feed_share_from_session_user / article.int_page_from_session_read_user).toFixed(2),
+            "banner" : article.msgid.endsWith("_1") ? 'Y' : 'N'
         })
     })
     return articlesWithPercentage
@@ -41,14 +42,17 @@ function saveAsCsv(articles, path) {
         label: '发布日期',
         value: 'publish_date'
     },{
+        label: '头条（Y/N）',
+        value: 'banner'
+    },{
         label: '总用户人数',
         value: 'target_user'
     },{
         label: '一次打开人数',
-        value: 'int_page_read_user'
+        value: 'int_page_from_session_read_user'
     },{
         label: '分享人数',
-        value: 'share_user'
+        value: 'feed_share_from_session_user'
     },{
         label: '一次转化率（一次打开人数／总用户人数）',
         value: 'first_open_rate'
@@ -59,9 +63,7 @@ function saveAsCsv(articles, path) {
 
     const parser = new Json2csvParser({
         fields,
-        excelStrings : true,
-        withBOM : true,
-        delimiter : '\t'
+        withBOM : true
     })
     const csv = parser.parse(articles)
     fs.writeFile(path, csv, 'utf8', function(err) {
