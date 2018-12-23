@@ -29,6 +29,7 @@ function calcPercentage(articles) {
         return _.extend(article, {
             "first_open_rate": (100.0 * article.int_page_from_session_read_user / article.target_user).toFixed(2),
             "second_open_rate": (100.0 * article.feed_share_from_session_user / article.int_page_from_session_read_user).toFixed(2),
+	    "position": /_(\d)/.exec(article.msgid)[1],
             "banner" : article.msgid.endsWith("_1") ? 'Y' : 'N'
         })
     })
@@ -37,8 +38,9 @@ function calcPercentage(articles) {
 
 function filterArticles(articles) {
     return _.filter(articles, function(article) {
-        return article.banner == 'Y' && article.int_page_read_user > 100*10000 || 
-            article.banner == 'N' && article.int_page_read_user > 40*10000;
+        return article.position == 1  && article.first_open_rate > 2.8 || 
+               article.position == 2  && article.first_open_rate > 1.3 || 
+               article.position > 2   && article.first_open_rate > 1;
     });
 }
 function saveAsCsv(articles, path) {
@@ -49,8 +51,8 @@ function saveAsCsv(articles, path) {
         label: '发布日期',
         value: 'publish_date'
     },{
-        label: '头条（Y/N）',
-        value: 'banner'
+        label: '位置',
+        value: 'position'
     },{
         label: '总用户人数',
         value: 'target_user'
